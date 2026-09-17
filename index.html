@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weatherly — Premium Weather App</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Weather Background Overlay -->
+  <div id="bg-overlay" class="bg-overlay"></div>
+  <div id="particles" class="particles"></div>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="loading-logo">🌤️</div>
+      <div class="loading-title">Weatherly</div>
+      <div class="loading-bar"><div class="loading-fill"></div></div>
+      <div class="loading-text">Fetching weather data...</div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="app hidden">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <span class="logo">🌤️</span>
+        <span class="app-name">Weatherly</span>
+      </div>
+      <div class="header-center">
+        <div class="search-wrapper">
+          <input
+            type="text"
+            id="city-search"
+            class="search-input"
+            placeholder="Search city..."
+            autocomplete="off"
+          />
+          <button class="search-btn" id="search-btn" aria-label="Search">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </button>
+          <div id="search-suggestions" class="search-suggestions hidden"></div>
+        </div>
+        <button class="location-btn" id="location-btn" title="Use my location">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          My Location
+        </button>
+      </div>
+      <div class="header-right">
+        <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+          <span class="theme-icon" id="theme-icon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Error Banner -->
+    <div id="error-banner" class="error-banner hidden">
+      <span id="error-message">City not found. Try another search.</span>
+      <button id="error-close" class="error-close">✕</button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Left Column -->
+      <section class="left-col">
+
+        <!-- Current Weather Card -->
+        <div class="card current-card">
+          <div class="current-top">
+            <div class="current-meta">
+              <div class="current-city" id="current-city">Hyderabad</div>
+              <div class="current-country" id="current-country">India</div>
+              <div class="current-datetime" id="current-datetime"></div>
+            </div>
+            <div class="current-icon" id="current-icon">⛅</div>
+          </div>
+          <div class="current-temp-row">
+            <div class="current-temp" id="current-temp">32°</div>
+            <div class="current-feels">
+              <span class="feels-label">Feels like</span>
+              <span id="feels-like">35°</span>
+            </div>
+          </div>
+          <div class="current-desc" id="current-desc">Partly Cloudy</div>
+          <div class="current-hilo">
+            <span class="hi">H: <b id="temp-high">36°</b></span>
+            <span class="lo">L: <b id="temp-low">26°</b></span>
+          </div>
+        </div>
+
+        <!-- Date Selector -->
+        <div class="card date-card">
+          <div class="date-card-header">
+            <h3 class="card-title">Select Date</h3>
+            <span class="date-nav">
+              <button id="prev-week" class="nav-arrow">‹</button>
+              <span id="date-range-label" class="date-range-label"></span>
+              <button id="next-week" class="nav-arrow">›</button>
+            </span>
+          </div>
+          <div id="date-selector" class="date-selector"></div>
+        </div>
+
+        <!-- Weather Suggestions -->
+        <div class="card suggestions-card">
+          <h3 class="card-title">💡 Today's Suggestions</h3>
+          <div id="suggestions-list" class="suggestions-list"></div>
+        </div>
+
+        <!-- AQI Card -->
+        <div class="card aqi-card">
+          <h3 class="card-title">🌿 Air Quality</h3>
+          <div class="aqi-body">
+            <div class="aqi-number" id="aqi-number">72</div>
+            <div class="aqi-label" id="aqi-label">Moderate</div>
+          </div>
+          <div class="aqi-bar-wrap">
+            <div class="aqi-bar">
+              <div class="aqi-fill" id="aqi-fill"></div>
+              <div class="aqi-thumb" id="aqi-thumb"></div>
+            </div>
+            <div class="aqi-scale">
+              <span>Good</span><span>Moderate</span><span>Poor</span><span>Hazardous</span>
+            </div>
+          </div>
+          <div class="aqi-pollutants" id="aqi-pollutants"></div>
+        </div>
+
+      </section>
+
+      <!-- Center Column -->
+      <section class="center-col">
+
+        <!-- Hourly Temperature Graph -->
+        <div class="card graph-card">
+          <div class="graph-header">
+            <h3 class="card-title">🌡️ Temperature Today</h3>
+            <span class="graph-date-label" id="graph-date-label"></span>
+          </div>
+          <div class="graph-container" id="graph-container">
+            <svg id="temp-graph" class="temp-graph" viewBox="0 0 800 200" preserveAspectRatio="none"></svg>
+            <div id="graph-tooltip" class="graph-tooltip hidden"></div>
+            <div id="sun-emoji" class="sun-emoji">☀️</div>
+          </div>
+          <div id="time-labels" class="time-labels"></div>
+        </div>
+
+        <!-- Hourly Forecast Strip -->
+        <div class="card hourly-card">
+          <h3 class="card-title">⏱️ Hourly Breakdown</h3>
+          <div id="hourly-strip" class="hourly-strip"></div>
+        </div>
+
+        <!-- 7-Day Forecast -->
+        <div class="card forecast-card">
+          <h3 class="card-title">📅 7-Day Forecast</h3>
+          <div id="forecast-list" class="forecast-list"></div>
+        </div>
+
+        <!-- Upcoming Temp Prediction Graph -->
+        <div class="card prediction-card">
+          <h3 class="card-title">📈 7-Day Temperature Trend</h3>
+          <div class="prediction-graph-wrap">
+            <svg id="prediction-graph" class="prediction-graph" viewBox="0 0 800 160" preserveAspectRatio="none"></svg>
+          </div>
+          <div id="prediction-labels" class="prediction-labels"></div>
+        </div>
+
+      </section>
+
+      <!-- Right Column -->
+      <section class="right-col">
+
+        <!-- Sun & Moon -->
+        <div class="card sun-card">
+          <h3 class="card-title">🌅 Sun & Moon</h3>
+          <div class="sun-arc-wrap">
+            <svg id="sun-arc" class="sun-arc" viewBox="0 0 300 120"></svg>
+            <div class="sun-times">
+              <div class="sun-time-item">
+                <span class="sun-time-label">🌅 Sunrise</span>
+                <span class="sun-time-val" id="sunrise-time">06:12 AM</span>
+              </div>
+              <div class="sun-time-item">
+                <span class="sun-time-label">🌇 Sunset</span>
+                <span class="sun-time-val" id="sunset-time">06:48 PM</span>
+              </div>
+            </div>
+          </div>
+          <div class="daylight-bar-wrap">
+            <div class="daylight-label">Daylight: <b id="daylight-hours">12h 36m</b></div>
+            <div class="daylight-bar">
+              <div class="daylight-fill" id="daylight-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="card details-card">
+          <h3 class="card-title">📊 Weather Details</h3>
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-icon">💧</span>
+              <span class="detail-label">Humidity</span>
+              <span class="detail-val" id="humidity">68%</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">💨</span>
+              <span class="detail-label">Wind</span>
+              <span class="detail-val" id="wind-speed">14 km/h</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">🌬️</span>
+              <span class="detail-label">Wind Dir</span>
+              <span class="detail-val" id="wind-dir">SW</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">☀️</span>
+              <span class="detail-label">UV Index</span>
+              <span class="detail-val" id="uv-index">7</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">🌧️</span>
+              <span class="detail-label">Rainfall</span>
+              <span class="detail-val" id="rainfall">3.2 mm</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">👁️</span>
+              <span class="detail-label">Visibility</span>
+              <span class="detail-val" id="visibility">10 km</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">🌡️</span>
+              <span class="detail-label">Dew Point</span>
+              <span class="detail-val" id="dew-point">24°C</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">⬇️</span>
+              <span class="detail-label">Pressure</span>
+              <span class="detail-val" id="pressure">1013 hPa</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wind Compass -->
+        <div class="card wind-card">
+          <h3 class="card-title">🧭 Wind</h3>
+          <div class="wind-body">
+            <div class="compass-wrap">
+              <svg id="compass-svg" viewBox="0 0 120 120" width="120" height="120">
+                <circle cx="60" cy="60" r="54" class="compass-ring"/>
+                <text x="60" y="14" text-anchor="middle" class="compass-dir-text">N</text>
+                <text x="60" y="112" text-anchor="middle" class="compass-dir-text">S</text>
+                <text x="108" y="64" text-anchor="middle" class="compass-dir-text">E</text>
+                <text x="12" y="64" text-anchor="middle" class="compass-dir-text">W</text>
+                <polygon id="compass-arrow" points="60,20 65,60 60,68 55,60" class="compass-arrow"/>
+                <circle cx="60" cy="60" r="5" class="compass-center"/>
+              </svg>
+            </div>
+            <div class="wind-stats">
+              <div class="wind-stat">
+                <span class="ws-label">Speed</span>
+                <span class="ws-val" id="ws-speed">14 km/h</span>
+              </div>
+              <div class="wind-stat">
+                <span class="ws-label">Gusts</span>
+                <span class="ws-val" id="ws-gusts">22 km/h</span>
+              </div>
+              <div class="wind-stat">
+                <span class="ws-label">Direction</span>
+                <span class="ws-val" id="ws-dir">SW</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <span>Weatherly &copy; 2026 — Powered by Mock Data</span>
+      <span class="footer-note">Data updates simulated every 60s</span>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
